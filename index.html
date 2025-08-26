@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <title>Homepage</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div id="search">
+    <input id="search-field" type="text" name="search-field" placeholder="Search here..."
+      onkeypress="return search(event)" />
+  </div>
+  <div class="container">
+    <div id="clock"></div>
+    <div class="weather-container">
+      <div class="row">
+        <div id="weather-description" class="inline"></div>
+        <div class="inline">-</div>
+        <div id="temp" class="inline"></div>
+      </div>
+    </div>
+    <div id="bookmark-container"></div>
+  </div>
+
+  <script src="bookmarks.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
