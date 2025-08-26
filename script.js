@@ -1,103 +1,258 @@
-// Configuration variables
-const searchUrl = "https://searx.tiekoetter.com/search?q="; // Search engine URL
-const weatherCity = "Istanbul"; // City for weather data
-const openWeatherApiKey = "YOUR_API_KEY"; // OpenWeatherMap API key
+const CONFIG = new Proxy({
+  searchUrl: "https://searx.tiekoetter.com/search?q=",
+  weatherCity: "Istanbul",
+  openWeatherApiKey: "YOUR_API_KEY",
+  clockUpdateInterval: 1000, // Update every second instead of 100ms
+  timezone: "Europe/Istanbul", // Default timezone - can be changed
+  hourFormat: "24" // "12" or "24" hour format
+}, {
+  set(target, property, value) {
+    const oldValue = target[property];
+    target[property] = value;
+    
+    // If timezone or hourFormat is changed, restart the clock
+    if ((property === 'timezone' || property === 'hourFormat') && oldValue !== value && typeof Clock !== 'undefined') {
+      console.log(`${property} changed from ${oldValue} to ${value}`);
+      Clock.restart();
+    }
+    
+    return true;
+  }
+});
 
-// Search on enter key event
-function search(e) {
-  if (e.keyCode == 13) {
-    var val = $("#search-field").val();
-    if (val.trim() !== "") {
-      window.open(searchUrl + val);
+// Utility functions
+const Utils = {
+  // Get current date (system locale)
+  getCurrentDate(timezone = CONFIG.timezone) {
+    const date = new Date();
+    try {
+      const dateOptions = {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      };
+      return date.toLocaleDateString(undefined, dateOptions); // system locale
+    } catch (error) {
+      console.warn(`Invalid timezone: ${timezone}. Using local date.`);
+      return `${date.getDate().toString().padStart(2,'0')}.${(date.getMonth()+1).toString().padStart(2,'0')}.${date.getFullYear()}`;
+    }
+  },
+
+  // Get current time
+  getCurrentTime(timezone = CONFIG.timezone) {
+    const date = new Date();
+    try {
+      const timeOptions = {
+        timeZone: timezone,
+        hour12: String(CONFIG.hourFormat) === "12",
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+
+      const timeString = date.toLocaleTimeString(undefined, timeOptions);
+      return String(CONFIG.hourFormat) === "12"
+        ? timeString.replace(/\s?(ÖÖ|ÖS|AM|PM)/, '') // AM/PM & ÖÖ/ÖS sil
+        : timeString;
+    } catch (error) {
+      console.warn(`Invalid timezone: ${timezone}. Using local time.`);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+  },
+
+  // Format temperature
+  formatTemperature(temp) {
+    return `${Math.round(temp)} °C`;
+  },
+
+  // Open search in new tab
+  openSearch(query) {
+    if (query.trim()) {
+      window.open(CONFIG.searchUrl + encodeURIComponent(query));
     }
   }
-}
+};
 
-// Get current time and format
-function getTime() {
-  let date = new Date(),
-    min = date.getMinutes(),
-    sec = date.getSeconds(),
-    hour = date.getHours();
-  return (
-    "" +
-    (hour < 10 ? "0" + hour : hour) +
-    ":" +
-    (min < 10 ? "0" + min : min) +
-    ":" +
-    (sec < 10 ? "0" + sec : sec)
-  );
-}
+// Search functionality
+const Search = {
+  elements: {
+    searchContainer: '#search',
+    searchField: '#search-field'
+  },
 
-// Handle Weather request
-function getWeather() {
-  $.ajax({
-    url: `https://api.openweathermap.org/data/2.5/weather?q=${weatherCity}&units=metric&appid=${openWeatherApiKey}`,
-    method: "GET",
-    success: function(data) {
-      $("#temp").html(data.main.temp.toFixed(0) + " °C");
-      $("#weather-description").html(data.weather[0].description);
-    },
-    error: function(xhr) {
-      console.log("Error message: " + xhr.status);
-      $("#temp").html("N/A");
-      $("#weather-description").html("No data");
+  init() {
+    $(document).on('keyup', this.handleKeyPress.bind(this));
+    $(this.elements.searchContainer).on('click', this.handleContainerClick.bind(this));
+    $(this.elements.searchField).on('keypress', this.handleSearch.bind(this));
+  },
+
+  handleKeyPress(event) {
+    const { keyCode } = event;
+    
+    if (keyCode === 32) { // Spacebar - open search
+      this.show();
+    } else if (keyCode === 27) { // Escape - close search
+      this.hide();
+    }
+  },
+
+  handleContainerClick(event) {
+    if (event.target.id === 'search') {
+      this.hide();
+    }
+  },
+
+  handleSearch(event) {
+    if (event.keyCode === 13) { // Enter key
+      const query = $(this.elements.searchField).val();
+      Utils.openSearch(query);
+    }
+  },
+
+  show() {
+    $(this.elements.searchContainer).css('display', 'flex');
+    $(this.elements.searchField).focus();
+  },
+
+  hide() {
+    $(this.elements.searchField).val('').blur();
+    $(this.elements.searchContainer).hide();
+  }
+};
+
+// Weather functionality
+const Weather = {
+  elements: {
+    temperature: '#temp',
+    description: '#weather-description'
+  },
+
+  async fetchWeather() {
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${CONFIG.weatherCity}&units=metric&appid=${CONFIG.openWeatherApiKey}`;
+    
+    try {
+      const response = await $.ajax({
+        url: apiUrl,
+        method: 'GET',
+        timeout: 10000 // 10 second timeout
+      });
+      
+      this.displayWeather(response);
+    } catch (error) {
+      console.error('Weather API error:', error);
+      this.displayError();
+    }
+  },
+
+  displayWeather(data) {
+    $(this.elements.temperature).text(Utils.formatTemperature(data.main.temp));
+    $(this.elements.description).text(data.weather[0].description);
+  },
+
+  displayError() {
+    $(this.elements.temperature).text('N/A');
+    $(this.elements.description).text('Connection error');
+  }
+};
+
+// Clock functionality
+const Clock = {
+  element: '#clock',
+  intervalId: null,
+
+  init() {
+    this.update();
+    this.startTicking();
+  },
+
+  update() {
+    const dateStr = Utils.getCurrentDate();
+    const timeStr = Utils.getCurrentTime();
+    $(this.element).html(`
+      <div class="date">${dateStr}</div>
+      <div class="time">${timeStr}</div>
+    `);
+  },
+
+  startTicking() {
+    // Calculate milliseconds until next second to sync properly
+    const now = new Date();
+    const msUntilNextSecond = 1000 - now.getMilliseconds();
+    
+    // First timeout to sync to the next second boundary
+    setTimeout(() => {
+      this.update();
+      // Then start the regular interval
+      this.intervalId = setInterval(() => {
+        this.update();
+      }, CONFIG.clockUpdateInterval);
+    }, msUntilNextSecond);
+  },
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  },
+
+  restart() {
+    this.stop();
+    this.init();
+  }
+};
+
+// Bookmarks functionality
+const Bookmarks = {
+  element: '#bookmark-container',
+
+  init() {
+    if (typeof bookmarks !== 'undefined' && Array.isArray(bookmarks)) {
+      this.render();
+    } else {
+      console.warn('Bookmarks data not found or invalid');
+    }
+  },
+
+  render() {
+    const html = bookmarks.map(this.createBookmarkSet).join('');
+    $(this.element).html(html);
+  },
+
+  createBookmarkSet(bookmarkSet) {
+    const linksHtml = bookmarkSet.links
+      .map(link => `<a class="bookmark" href="${link.url}" target="_blank">${link.name}</a>`)
+      .join('');
+
+    return `
+      <div class='bookmark-set'>
+        <div class="bookmark-title">${bookmarkSet.title}</div>
+        <div class="bookmark-inner-container">
+          ${linksHtml}
+        </div>
+      </div>
+    `;
+  }
+};
+
+// Main application initialization
+$(document).ready(() => {
+  // Initialize all components
+  Bookmarks.init();
+  Weather.fetchWeather();
+  Clock.init();
+  Search.init();
+
+  // Handle page visibility changes to optimize performance
+  $(document).on('visibilitychange', () => {
+    if (document.hidden) {
+      Clock.stop();
+    } else {
+      Clock.init(); // Re-initialize to sync properly when page becomes visible again
     }
   });
-}
-
-// Handle writing out Bookmarks
-function setupBookmarks() {
-  const bookmarkHtml = bookmarks
-    .map((b) => {
-      const html = ["<div class='bookmark-set'>"];
-      html.push(`<div class="bookmark-title">${b.title}</div>`);
-      html.push('<div class="bookmark-inner-container">');
-      html.push(
-        ...b.links.map(
-          (l) =>
-            `<a class="bookmark" href="${l.url}" target="_blank">${l.name}</a>`
-        )
-      );
-      html.push("</div></div>");
-      return html.join("");
-    })
-    .join("");
-  
-  $("#bookmark-container").html(bookmarkHtml);
-}
-
-$(document).ready(function() {
-  setupBookmarks();
-  getWeather();
-  
-  // Set up the clock
-  $("#clock").html(getTime());
-  
-  // Set clock interval to tick clock
-  setInterval(function() {
-    $("#clock").html(getTime());
-  }, 100);
-});
-
-$(document).keyup(function(event) {
-  if (event.keyCode == 32) {
-    // Spacebar code to open search
-    $("#search").css("display", "flex");
-    $("#search-field").focus();
-  } else if (event.keyCode == 27) {
-    // Esc to close search
-    $("#search-field").val("");
-    $("#search-field").blur();
-    $("#search").css("display", "none");
-  }
-});
-
-// Close search when clicking outside the search box
-$("#search").click(function(e) {
-  if (e.target.id === "search") {
-    $("#search-field").val("");
-    $("#search-field").blur();
-    $("#search").css("display", "none");
-  }
 });
