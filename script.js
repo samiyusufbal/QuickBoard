@@ -3,7 +3,7 @@ const searchUrl = "https://searx.tiekoetter.com/search?q="; // Search engine URL
 // Search on enter key event
 function search(e) {
   if (e.keyCode == 13) {
-    var val = document.getElementById("search-field").value;
+    var val = $("#search-field").val();
     if (val.trim() !== "") {
       window.open(searchUrl + val);
     }
@@ -16,7 +16,6 @@ function getTime() {
     min = date.getMinutes(),
     sec = date.getSeconds(),
     hour = date.getHours();
-
   return (
     "" +
     (hour < 10 ? "0" + hour : hour) +
@@ -29,39 +28,24 @@ function getTime() {
 
 // Handle Weather request
 function getWeather() {
-  let xhr = new XMLHttpRequest();
-  // Request to open weather map - HTTPS kullanıyoruz
-  xhr.open(
-    "GET",
-    "https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&appid=YOUR_API_KEY" // OpenWeather Details
-  );
-  xhr.onload = () => {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        let json = JSON.parse(xhr.responseText);
-        document.getElementById("temp").innerHTML =
-          json.main.temp.toFixed(0) + " °C";
-        document.getElementById("weather-description").innerHTML =
-          json.weather[0].description;
-      } else {
-        console.log("error msg: " + xhr.status);
-        document.getElementById("temp").innerHTML = "N/A";
-        document.getElementById("weather-description").innerHTML = "Veri yok";
-      }
+  $.ajax({
+    url: "https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&appid=YOUR_API_KEY",
+    method: "GET",
+    success: function(data) {
+      $("#temp").html(data.main.temp.toFixed(0) + " °C");
+      $("#weather-description").html(data.weather[0].description);
+    },
+    error: function(xhr) {
+      console.log("Error message: " + xhr.status);
+      $("#temp").html("N/A");
+      $("#weather-description").html("No data");
     }
-  };
-  xhr.onerror = () => {
-    console.log("Weather API error");
-    document.getElementById("temp").innerHTML = "N/A";
-    document.getElementById("weather-description").innerHTML = "Bağlantı hatası";
-  };
-  xhr.send();
+  });
 }
 
 // Handle writing out Bookmarks
 function setupBookmarks() {
-  const bookmarkContainer = document.getElementById("bookmark-container");
-  bookmarkContainer.innerHTML = bookmarks
+  const bookmarkHtml = bookmarks
     .map((b) => {
       const html = ["<div class='bookmark-set'>"];
       html.push(`<div class="bookmark-title">${b.title}</div>`);
@@ -76,37 +60,41 @@ function setupBookmarks() {
       return html.join("");
     })
     .join("");
+  
+  $("#bookmark-container").html(bookmarkHtml);
 }
 
-window.onload = () => {
+$(document).ready(function() {
   setupBookmarks();
   getWeather();
+  
   // Set up the clock
-  document.getElementById("clock").innerHTML = getTime();
+  $("#clock").html(getTime());
+  
   // Set clock interval to tick clock
-  setInterval(() => {
-    document.getElementById("clock").innerHTML = getTime();
+  setInterval(function() {
+    $("#clock").html(getTime());
   }, 100);
-};
+});
 
-document.addEventListener("keyup", (event) => {
+$(document).keyup(function(event) {
   if (event.keyCode == 32) {
     // Spacebar code to open search
-    document.getElementById("search").style.display = "flex";
-    document.getElementById("search-field").focus();
+    $("#search").css("display", "flex");
+    $("#search-field").focus();
   } else if (event.keyCode == 27) {
     // Esc to close search
-    document.getElementById("search-field").value = "";
-    document.getElementById("search-field").blur();
-    document.getElementById("search").style.display = "none";
+    $("#search-field").val("");
+    $("#search-field").blur();
+    $("#search").css("display", "none");
   }
 });
 
-// Arama kutusuna tıklanınca dışarıda kapanma
-document.getElementById("search").addEventListener("click", (e) => {
+// Close search when clicking outside the search box
+$("#search").click(function(e) {
   if (e.target.id === "search") {
-    document.getElementById("search-field").value = "";
-    document.getElementById("search-field").blur();
-    document.getElementById("search").style.display = "none";
+    $("#search-field").val("");
+    $("#search-field").blur();
+    $("#search").css("display", "none");
   }
 });
