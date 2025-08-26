@@ -6,13 +6,13 @@ A simple and clean homepage that shows time, weather, and your favorite bookmark
 
 ## Features
 
-- **Real-time Clock**: Shows current time with seconds
-- **Weather Information**: Displays current weather and temperature
-- **Quick Bookmarks**: Easy access to your favorite websites
-- **Search Function**: Quick search using keyboard shortcuts
-- **Dark Theme**: Easy on the eyes with a dark color scheme
-- **Responsive Design**: Works on both desktop and mobile devices
-- **Click Outside to Close**: Click anywhere outside the search box to close it
+-   **Real-time Clock**: Shows the current time, including seconds. You can switch between 12 and 24-hour formats.
+-   **Weather Information**: Displays the current weather and temperature.
+-   **Quick Bookmarks**: Gives you easy access to your favorite websites.
+-   **Search Function**: Quick search using keyboard shortcuts.
+-   **Dark Theme**: Easy on the eyes with a dark color scheme.
+-   **Responsive Design**: It works on both desktop and mobile devices.
+-   **Click Outside to Close**: You can click anywhere outside the search box to close it.
 
 ## How to Use
 
@@ -46,66 +46,64 @@ Download or clone all the files:
 - `bookmarks.js`
 - `script.js`
 
-### 2. Set Up Weather API
+#### 2\. Set Up the Weather API
+The weather feature uses the OpenWeatherMap API. You need to get your own API key:
+1.  Go to [OpenWeatherMap](https://openweathermap.org/api "null").
+2.  Sign up for a free account.
+3.  Get your API key.
+4.  Open the `script.js` file.
+5.  Find the `openWeatherApiKey` line inside the `CONFIG` object and change the example key with your own API key:
 
-The weather feature uses OpenWeatherMap API. You need to get your own API key:
-
-1. Go to [OpenWeatherMap](https://openweathermap.org/api)
-2. Sign up for a free account
-3. Get your API key
-4. Open `script.js` file
-5. Find this line (around line 27):
-```javascript
-"https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&appid=YOUR_API_KEY"
 ```
-6. Replace `YOUR_API_KEY` with your own API key
-
-### 3. Change Your City
-
-To show weather for your city:
-1. In the same line in `script.js`, change `Istanbul` to your city name
-2. Make sure to spell your city name correctly in English
-3. For cities with spaces, use `%20` instead of spaces (example: `New%20York`)
-
-Example for London:
-```javascript
-"https://api.openweathermap.org/data/2.5/weather?q=London&units=metric&appid=YOUR_API_KEY"
+const CONFIG = new Proxy({
+  searchUrl: "https://searx.tiekoetter.com/search?q=",
+  weatherCity: "Istanbul",
+  openWeatherApiKey: "YOUR_API_KEY",
+  clockUpdateInterval: 1000,
+  timezone: "Europe/Istanbul",
+  units: "metric",
+  hourFormat: "24"
+}
 ```
 
-Example for New York:
-```javascript
-"https://api.openweathermap.org/data/2.5/weather?q=New%20York&units=metric&appid=YOUR_API_KEY"
+#### 3\. Change Your City
+To show the weather for your city:
+1.  Open the `script.js` file.
+2.  Find the `weatherCity` line inside the `CONFIG` object and change `"Istanbul"` to your city name:
 ```
+weatherCity: "London",
+```
+For cities with spaces, use `%20` instead of spaces (e.g., `New%20York`).
 
 ### 4. Change Search Engine
 
 The default search engine is Searx. To change it:
 
-1. Open `script.js`
-2. Find this line (line 1):
+1.  Open the `script.js` file.
+2.  Find the `searchUrl` line inside the `CONFIG` object and change it to your preferred search engine:
 ```javascript
-const searchUrl = "https://searx.tiekoetter.com/search?q=";
+searchUrl: "https://searx.tiekoetter.com/search?q=",
 ```
 3. Replace it with your preferred search engine:
 
 **For Google:**
 ```javascript
-const searchUrl = "https://www.google.com/search?q=";
+searchUrl: "https://www.google.com/search?q=",
 ```
 
 **For DuckDuckGo:**
 ```javascript
-const searchUrl = "https://duckduckgo.com/?q=";
+searchUrl: "https://duckduckgo.com/?q=",
 ```
 
 **For Bing:**
 ```javascript
-const searchUrl = "https://www.bing.com/search?q=";
+searchUrl: "https://www.bing.com/search?q=",
 ```
 
 **For Yandex:**
 ```javascript
-const searchUrl = "https://yandex.com/search/?text=";
+searchUrl: "https://yandex.com/search/?text=",
 ```
 
 ### 5. Customize Your Bookmarks
@@ -144,9 +142,8 @@ const bookmarks = [
 ```
 
 **Current Default Bookmarks Include:**
-- **Sites**: Development and tech websites
-- **Social**: Social media platforms
-- **GitHub**: Git repositories and profiles
+- **News**: BBC News, CNN, Reuters
+- **Tools**: Gmail, Google Drive, Dropbox
 
 ### 6. Change Search Placeholder Text
 
@@ -159,7 +156,7 @@ To change the search box placeholder text:
 ```
 3. Change `"Search here..."` to your preferred text:
 ```html
-<input id="search-field" type="text" name="search-field" placeholder="Arama yapın..."
+<input id="search-field" type="text" name="search-field" placeholder="Search for something..."
 ```
 
 ## Color Customization
@@ -206,44 +203,31 @@ You can change colors by editing the CSS variables in `styles.css`:
 
 ## Advanced Customization
 
-### Clock Format
-To change clock format, edit the `getTime()` function in `script.js`:
-
-**12-hour format with AM/PM:**
-```javascript
-function getTime() {
-  let date = new Date();
-  return date.toLocaleString('en-US', { 
-    hour: 'numeric', 
-    minute: 'numeric', 
-    second: 'numeric',
-    hour12: true 
-  });
-}
+#### Clock Format and Timezone
+To change the clock format and timezone, edit the `CONFIG` object in `script.js`.
+**For 24-hour format:**
 ```
-
-**24-hour format without seconds:**
-```javascript
-function getTime() {
-  let date = new Date(),
-    min = date.getMinutes(),
-    hour = date.getHours();
-
-  return (
-    "" +
-    (hour < 10 ? "0" + hour : hour) +
-    ":" +
-    (min < 10 ? "0" + min : min)
-  );
-}
+hourFormat: "24",
 ```
+**For 12-hour format:**
+```
+hourFormat: "12",
+```
+To change the timezone, update the `timezone` value (e.g., `America/New_York`).
 
 ### Weather Units
 To change temperature units from Celsius to Fahrenheit:
 
 1. Open `script.js`
-2. Find `&units=metric` in the weather API URL
-3. Change it to `&units=imperial`
+2. To change the units, edit the `CONFIG` object in `script.js`.
+**For metric format:**
+```
+units: "metric",
+```
+**For imperial format:**
+```
+units: "imperial",
+```
 
 ### Font Changes
 To use a different font:
@@ -329,7 +313,7 @@ To use a different font:
 
 ## Technical Details
 
-- **Pure HTML, CSS, and JavaScript** - no frameworks needed
+- **HTML, CSS, and jQuery** 
 - **Mobile responsive** design with flexible layout
 - **Keyboard shortcuts** for quick access
 - **Real-time updates** for clock every 100ms
@@ -366,18 +350,6 @@ To use a different font:
 },
 ```
 
-### Custom Search Engines
-```javascript
-// For Turkish users - Yandex Turkey
-const searchUrl = "https://yandex.com.tr/search/?text=";
-
-// For privacy-focused users - Startpage
-const searchUrl = "https://startpage.com/do/search?q=";
-
-// For developers - GitHub search
-const searchUrl = "https://github.com/search?q=";
-```
-
 ## License
 
 This project is free to use and modify. Feel free to customize it for your needs!
@@ -392,10 +364,12 @@ This project is free to use and modify. Feel free to customize it for your needs
 ## Changelog
 
 ### Current Version
-- Separated JavaScript into `script.js` file
-- Added HTTPS for weather API
-- Improved error handling for weather
-- Added click-outside-to-close for search
-- Better responsive design
-- Added Turkish placeholder text support
-- Improved code organization and comments
+-   Consolidated configuration variables into a single `CONFIG` object.
+-   Added support for 12 or 24-hour clock formats.
+-   Improved performance for page visibility.
+-   Separated JavaScript into a `script.js` file.
+-   Added HTTPS for the weather API.
+-   Improved weather error handling.
+-   Added click-outside-to-close for the search.
+-   Improved responsive design.
+-   Improved code organization and comments.
