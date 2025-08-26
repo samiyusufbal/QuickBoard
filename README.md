@@ -2,7 +2,7 @@
 
 A simple and clean homepage that shows time, weather, and your favorite bookmarks. Perfect for anyone who wants a minimal start page in their browser.
 
-![Homepage Screenshot](./image.png)
+![Homepage Screenshot](./screenshot.png)
 
 ## Features
 
