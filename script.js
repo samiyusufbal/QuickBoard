@@ -4,6 +4,7 @@ const CONFIG = new Proxy({
   openWeatherApiKey: "YOUR_API_KEY",
   clockUpdateInterval: 1000, // Update every second instead of 100ms
   timezone: "Europe/Istanbul", // Default timezone - can be changed
+  units: "metric", // Default metric - can be imperial
   hourFormat: "24" // "12" or "24" hour format
 }, {
   set(target, property, value) {
@@ -132,7 +133,7 @@ const Weather = {
   },
 
   async fetchWeather() {
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${CONFIG.weatherCity}&units=metric&appid=${CONFIG.openWeatherApiKey}`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${CONFIG.weatherCity}&units=${CONFIG.units}&appid=${CONFIG.openWeatherApiKey}`;
     
     try {
       const response = await $.ajax({
@@ -256,3 +257,4 @@ $(document).ready(() => {
     }
   });
 });
+
