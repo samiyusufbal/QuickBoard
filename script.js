@@ -1,4 +1,7 @@
+// Configuration variables
 const searchUrl = "https://searx.tiekoetter.com/search?q="; // Search engine URL
+const weatherCity = "Istanbul"; // City for weather data
+const openWeatherApiKey = "YOUR_API_KEY"; // OpenWeatherMap API key
 
 // Search on enter key event
 function search(e) {
@@ -29,7 +32,7 @@ function getTime() {
 // Handle Weather request
 function getWeather() {
   $.ajax({
-    url: "https://api.openweathermap.org/data/2.5/weather?q=Istanbul&units=metric&appid=YOUR_API_KEY",
+    url: `https://api.openweathermap.org/data/2.5/weather?q=${weatherCity}&units=metric&appid=${openWeatherApiKey}`,
     method: "GET",
     success: function(data) {
       $("#temp").html(data.main.temp.toFixed(0) + " °C");
