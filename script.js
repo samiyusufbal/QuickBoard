@@ -1,7 +1,7 @@
 const CONFIG = new Proxy({
   searchUrl: "https://searx.tiekoetter.com/search?q=",
   weatherCity: "Istanbul",
-  openWeatherApiKey: "YOUR_API_KEY",
+  openWeatherApiKey: "OPENWEATHER_API_KEY",
   clockUpdateInterval: 1000, // Update every second instead of 100ms
   timezone: "Europe/Istanbul", // Default timezone - can be changed
   units: "metric", // Default metric - can be imperial
@@ -257,4 +257,5 @@ $(document).ready(() => {
     }
   });
 });
+
 
