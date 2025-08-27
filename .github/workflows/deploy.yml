@@ -17,27 +17,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
       - name: Inject API Key
         run: |
-          # Change API key from script.js
-          sed -i "s/OPENWEATHER_API_KEY:.*$/OPENWEATHER_API_KEY: '${{ secrets.OPENWEATHER_API_KEY }}',/g" script.js
-          
-          # Edit the CONFIG object
+          # Edit the API key in the script.js file
           sed -i "s/openWeatherApiKey:.*$/openWeatherApiKey: '${{ secrets.OPENWEATHER_API_KEY }}',/g" script.js
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: "."
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
