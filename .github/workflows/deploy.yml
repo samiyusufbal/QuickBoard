@@ -24,10 +24,10 @@ jobs:
 
       - name: Inject API Key
         run: |
-          # Change API key from script.js file
+          # Change API key from script.js
           sed -i "s/OPENWEATHER_API_KEY:.*$/OPENWEATHER_API_KEY: '${{ secrets.OPENWEATHER_API_KEY }}',/g" script.js
           
-          # Edit CONFIG object
+          # Edit the CONFIG object
           sed -i "s/openWeatherApiKey:.*$/openWeatherApiKey: '${{ secrets.OPENWEATHER_API_KEY }}',/g" script.js
 
       - name: Setup Pages
