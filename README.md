@@ -2,7 +2,7 @@
 
 A modern, fast, and highly customizable personal dashboard. Built with **Vanilla JavaScript** and **Glassmorphism** design, QuickBoard transforms your browser's "New Tab" page into a beautiful and productive workspace.
 
-![Homepage Screenshot](./screenshot.png)
+![Homepage Screenshot](./screenshot_1.png)
 ![Homepage Screenshot](./screenshot_2.png)
 
 ## ✨ Features
